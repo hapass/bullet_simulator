@@ -38,3 +38,31 @@ Work of this class is visualized.
 1. Install [Brew](https://brew.sh)
 1. Run *brew install glfw3*
 1. Run *./run.sh*
+
+## Tasks
+
+Tuesday:
+
+1. Draw predefined bullets and lines on screen.
+1. Add bullets to the screen through bullet manager - single threaded.
+1. Move bullets on the screen - single threaded.
+
+Wednesday:
+
+1. Implement collision detection and resolution - single threaded.
+
+Thursday:
+
+1. Display FPS counter.
+
+Friday:
+
+1. Optimize drawing and collision detection as much as possible. Try using broad and narrow collision phases.
+
+Saturday:
+
+1. Add multi-threaded bullet addition - check performance. Release 1.0.
+
+Sunday - Tuesday:
+
+1. If performance is not good enough try multi-threading physics calculations. Release 2.0
