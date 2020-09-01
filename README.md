@@ -32,9 +32,9 @@ Work of this class is visualized.
 1. 100+ bullets and 100+ walls. FPS should not drop below 30.
 1. 1000+ bullets and 1000+ walls. Should perform as well as possible.
 
-## Build steps OS X
+## Run steps OS X
 
 1. Install [XCode](https://developer.apple.com/xcode/)
 1. Install [Brew](https://brew.sh)
 1. Run *brew install glfw3*
-1. Run *make*
+1. Run *./run.sh*
