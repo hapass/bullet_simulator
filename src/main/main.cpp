@@ -3,11 +3,32 @@
 
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include <vector>
+#include <utility>
+
+using namespace std;
+
+struct float2 { float x; float y; };
+
+struct BulletManager 
+{
+  BulletManager() 
+  : walls { -1.0f, 1.0f, 1.0f, -1.0f, -0.8f, 0.5f, 0.2f, -0.1f, -0.3f, 0.5f, 0.2f, -0.5f, -0.6f, 0.6f, 0.2f, -0.4f }
+  , bullets { 0.15, 0.25, -0.75, 0.85, 0.95, -0.35 }
+  {}
+
+  void Update(float time) 
+  {
+    bullets[0] += 0.001;
+  }
+  void Fire(float2 pos, float2 dir, float speed, float time, float life_time) {}
+
+  float walls[16];
+  float bullets[6];
+};
 
 int main(int argc, char** argv)
 {
-  using namespace std;
-
   if (!glfwInit())
   {
     return -1;
@@ -27,13 +48,6 @@ int main(int argc, char** argv)
   }
 
   glfwMakeContextCurrent(window);
-
-  float vertices[] = {
-    -0.5f, -0.5f,
-    0.5f, -0.5f,
-    0.0f, 0.5f,
-    -0.5f, -0.5f,
-  };
 
   // vertex shader
   GLuint vertexShaderId = glCreateShader(GL_VERTEX_SHADER);
@@ -111,32 +125,45 @@ int main(int argc, char** argv)
   glDeleteShader(vertexShaderId);
   glDeleteShader(fragmentShaderId);
 
-  // vertex buffer
-  GLuint vertexBufferId;
-  glGenBuffers(1, &vertexBufferId);
+  GLuint buffers[2];
+  glGenBuffers(2, buffers);
+  GLuint arrays[2];
+  glGenVertexArrays(2, arrays);
 
-  GLuint vertexArrayId;
-  glGenVertexArrays(1, &vertexArrayId);
+  BulletManager m;
 
-  glBindVertexArray(vertexArrayId);
-  glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+  glBindVertexArray(arrays[0]);
+  glBindBuffer(GL_ARRAY_BUFFER, buffers[0]);
+  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
   glEnableVertexAttribArray(0);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(m.walls), m.walls, GL_DYNAMIC_DRAW);
 
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+  glBindVertexArray(arrays[1]);
+  glBindBuffer(GL_ARRAY_BUFFER, buffers[1]);
+  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+  glEnableVertexAttribArray(0);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(m.bullets), m.bullets, GL_DYNAMIC_DRAW);
 
-  glPointSize(1.0);
-  glLineWidth(1.0);
-  glEnable(GL_LINE_SMOOTH);
+  glPointSize(2.0);
 
   while (!glfwWindowShouldClose(window))
   {
+    m.Update(0.16f);
+
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glUseProgram(shaderProgramId);
-    glBindVertexArray(vertexArrayId);
-    glDrawArrays(GL_LINES, 0, 4);
+
+    // draw walls
+    glBindVertexArray(arrays[0]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(m.walls), m.walls, GL_DYNAMIC_DRAW);
+    glDrawArrays(GL_LINES, 0, 8);
+
+    // draw bullets
+    glBindVertexArray(arrays[1]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(m.bullets), m.bullets, GL_DYNAMIC_DRAW);
+    glDrawArrays(GL_POINTS, 0, 3);
 
     glfwSwapBuffers(window);
     glfwPollEvents();
