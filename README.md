@@ -70,3 +70,9 @@ Sunday - Tuesday:
     * try different pools for bullets based on bullet id to minimize thread contention
     * try different threads per part of screen for collision detection
     * try atomic variables instead of locks
+
+Tuesday - Thursday:
+
+1. Window resize.
+1. Smooth lines.
+1. Circle bullets. Release 3.0

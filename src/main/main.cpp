@@ -32,6 +32,7 @@ int main(int argc, char** argv)
     -0.5f, -0.5f,
     0.5f, -0.5f,
     0.0f, 0.5f,
+    -0.5f, -0.5f,
   };
 
   // vertex shader
@@ -124,6 +125,10 @@ int main(int argc, char** argv)
 
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
+  glPointSize(1.0);
+  glLineWidth(1.0);
+  glEnable(GL_LINE_SMOOTH);
+
   while (!glfwWindowShouldClose(window))
   {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -131,7 +136,7 @@ int main(int argc, char** argv)
 
     glUseProgram(shaderProgramId);
     glBindVertexArray(vertexArrayId);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDrawArrays(GL_LINES, 0, 4);
 
     glfwSwapBuffers(window);
     glfwPollEvents();
