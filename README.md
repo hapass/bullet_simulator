@@ -41,14 +41,10 @@ Work of this class is visualized.
 
 ## Tasks
 
-Tuesday:
-
-1. Draw predefined bullets and lines on screen.
-1. Add bullets to the screen through bullet manager - single threaded.
-1. Move bullets on the screen - single threaded.
-
 Wednesday:
 
+1. Add bullets to the screen through bullet manager - single threaded.
+1. Move bullets on the screen - single threaded.
 1. Implement collision detection and resolution - single threaded.
 
 Thursday:
