@@ -58,7 +58,7 @@ Thursday:
 Friday:
 
 1. Optimize drawing and collision detection as much as possible.
-    * Try using broad and narrow collision phases.
+    * try using broad and narrow collision phases
 
 Saturday:
 
