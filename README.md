@@ -57,7 +57,8 @@ Thursday:
 
 Friday:
 
-1. Optimize drawing and collision detection as much as possible. Try using broad and narrow collision phases.
+1. Optimize drawing and collision detection as much as possible.
+    * Try using broad and narrow collision phases.
 
 Saturday:
 
@@ -66,3 +67,6 @@ Saturday:
 Sunday - Tuesday:
 
 1. If performance is not good enough try multi-threading physics calculations. Release 2.0
+    * try different pools for bullets based on bullet id to minimize thread contention
+    * try different threads per part of screen for collision detection
+    * try atomic variables instead of locks
