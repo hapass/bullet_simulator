@@ -6,6 +6,7 @@
 #include <vector>
 #include <utility>
 #include <chrono>
+#include <math.h>
 #include <assert.h>
 
 using namespace std;
@@ -56,25 +57,45 @@ public:
   static const size_t FLOATS_PER_WALL = 4;
 };
 
+struct BulletInfo
+{
+  Vec2 speed;
+  float life_time;
+};
+
 class BulletsBuffer: public PointBuffer<float>
 {
 public:
-  void Add(Vec2 pos)
+  void Add(Vec2 position, Vec2 direction, float speed, float time, float life_time)
   {
-    buffer.push_back(pos.x);
-    buffer.push_back(pos.y);
+    buffer.push_back(position.x);
+    buffer.push_back(position.y);
+
+    Vec2 speed_vec = direction;
+
+    float speed_vec_norm = sqrt(speed_vec.x * speed_vec.x + speed_vec.y * speed_vec.y);
+    speed_vec.x /= speed_vec_norm;
+    speed_vec.y /= speed_vec_norm;
+    speed_vec.x *= speed;
+    speed_vec.y *= speed;
+
+    infos.push_back({speed_vec, life_time});
   }
 
   float& X(size_t i) { assert(BulletsCount() != 0 && i < BulletsCount()); return buffer[i * FLOATS_PER_BULLET + 0]; }
   float& Y(size_t i) { assert(BulletsCount() != 0 && i < BulletsCount()); return buffer[i * FLOATS_PER_BULLET + 1]; }
+  const BulletInfo& Info(size_t i) const { assert(BulletsCount() != 0 && i < BulletsCount()); return infos[i]; }
 
   void Remove(size_t i) { PointBuffer::Remove(i, PointsCount(), FLOATS_PER_BULLET); }
 
   const size_t BulletsCount() const { return PointsCount(); }
   static const size_t FLOATS_PER_BULLET = 2;
+
+private:
+  vector<BulletInfo> infos;
 };
 
-class BulletManager 
+class BulletManager
 {
 public:
   BulletManager() 
@@ -87,12 +108,16 @@ public:
 
   void Update(float time) 
   {
-    bullets.X(0) += 0.001;
+    for (size_t i = 0; i < bullets.BulletsCount(); i++)
+    {
+      bullets.X(i) += bullets.Info(i).speed.x;
+      bullets.Y(i) += bullets.Info(i).speed.y;
+    }
   }
 
-  void Fire(Vec2 pos, Vec2 dir, float speed, float time, float life_time) 
+  void Fire(Vec2 position, Vec2 direction, float speed, float time, float life_time)
   {
-    bullets.Add(pos);
+    bullets.Add(position, direction, speed, time, life_time);
   }
 
   const PointBuffer<float>& Walls() { return walls; }
@@ -207,9 +232,9 @@ int main(int argc, char** argv)
   glGenVertexArrays(2, arrays);
 
   BulletManager m;
-  m.Fire({0.15, 0.25}, {0.0f, 0.0f}, 0.0f, 0.0f, 0.0f);
-  m.Fire({-0.75, 0.85}, {0.0f, 0.0f}, 0.0f, 0.0f, 0.0f);
-  m.Fire({0.95, -0.35}, {0.0f, 0.0f}, 0.0f, 0.0f, 0.0f);
+  m.Fire({0.15, 0.25}, {1.0f, 0.0f}, 0.001f, 0.0f, 0.0f);
+  m.Fire({-0.75, 0.85}, {-1.0f, 0.0f}, 0.002f, 0.0f, 0.0f);
+  m.Fire({0.95, -0.35}, {0.5f, 0.5f}, 0.003f, 0.0f, 0.0f);
 
   glBindVertexArray(arrays[0]);
   glBindBuffer(GL_ARRAY_BUFFER, buffers[0]);

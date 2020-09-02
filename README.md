@@ -8,18 +8,18 @@ There is a BulletManager class with two public methods:
 1. Method that calculates bullet movement in given time, and in case of collision with the wall, removes the wall from the list and bullet continues movement with its trajectory reflected. Is called from main thread.
 
     ````C++
-    void Update (float time)
+    void Update(float time);
     ````
 
     * time – global update time in seconds
 1. Method that adds bullet to manager for further updates. Is called from different threads.
 
     ````C++
-    void Fire(Vec2 pos, Vec2 dir, float speed, float time, float life_time);
+    void Fire(Vec2 position, Vec2 direction, float speed, float time, float life_time);
     ````
 
-    * pos – starting point of the bullet on the plane (in meters)
-    * dir – direction
+    * position – starting point of the bullet on the plane (in meters)
+    * direction – bullet movement direction
     * speed – bullet speed (m/s)
     * time – when the bullet will be fired
     * life_time – time before bullet disappears
