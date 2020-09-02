@@ -21,6 +21,16 @@ public:
   const size_t Size() const { return sizeof(float) * buffer.size(); }
   const size_t PointsCount() const { return buffer.size() / 2; }
 protected:
+  void Remove(size_t i, size_t elements_count, size_t floats_per_element)
+  {
+    assert(elements_count != 0 && i < elements_count);
+
+    size_t item_offset = i * floats_per_element;
+    size_t last_offset = (elements_count - 1) * floats_per_element;
+    for (int j = 0; j < floats_per_element; j++) swap(buffer[item_offset + j], buffer[last_offset + j]);
+    for (int j = 0; j < floats_per_element; j++) buffer.pop_back();
+  }
+
   vector<T> buffer;
 };
 
@@ -35,21 +45,15 @@ public:
     buffer.push_back(end.y);
   }
 
-  float& StartX(size_t i) { assert(WallsCount() != 0 && i < WallsCount()); return buffer[i * 4 + 0]; }
-  float& StartY(size_t i) { assert(WallsCount() != 0 && i < WallsCount()); return buffer[i * 4 + 1]; }
-  float& EndX(size_t i) { assert(WallsCount() != 0 && i < WallsCount()); return buffer[i * 4 + 2]; }
-  float& EndY(size_t i) { assert(WallsCount() != 0 && i < WallsCount()); return buffer[i * 4 + 3]; }
+  float& StartX(size_t i) { assert(WallsCount() != 0 && i < WallsCount()); return buffer[i * FLOATS_PER_WALL + 0]; }
+  float& StartY(size_t i) { assert(WallsCount() != 0 && i < WallsCount()); return buffer[i * FLOATS_PER_WALL + 1]; }
+  float& EndX(size_t i) { assert(WallsCount() != 0 && i < WallsCount()); return buffer[i * FLOATS_PER_WALL + 2]; }
+  float& EndY(size_t i) { assert(WallsCount() != 0 && i < WallsCount()); return buffer[i * FLOATS_PER_WALL + 3]; }
 
-  void Remove(size_t i)
-  {
-    assert(WallsCount() != 0 && i < WallsCount());
+  void Remove(size_t i) { PointBuffer::Remove(i, WallsCount(), FLOATS_PER_WALL); }
 
-    size_t item_offset = i * 4;
-    size_t last_offset = (WallsCount() - 1) * 4;
-    for (int j = 0; j < 4; j++) swap(buffer[item_offset + j], buffer[last_offset + j]);
-  }
-
-  const size_t WallsCount() const { return buffer.size() / 4; }
+  const size_t WallsCount() const { return buffer.size() / FLOATS_PER_WALL; }
+  static const size_t FLOATS_PER_WALL = 4;
 };
 
 class BulletsBuffer: public PointBuffer<float>
@@ -61,13 +65,16 @@ public:
     buffer.push_back(pos.y);
   }
 
-  float& X(size_t i) { assert(BulletsCount() != 0 && i < BulletsCount()); return buffer[i * 2 + 0]; }
-  float& Y(size_t i) { assert(BulletsCount() != 0 && i < BulletsCount()); return buffer[i * 2 + 1]; }
+  float& X(size_t i) { assert(BulletsCount() != 0 && i < BulletsCount()); return buffer[i * FLOATS_PER_BULLET + 0]; }
+  float& Y(size_t i) { assert(BulletsCount() != 0 && i < BulletsCount()); return buffer[i * FLOATS_PER_BULLET + 1]; }
+
+  void Remove(size_t i) { PointBuffer::Remove(i, PointsCount(), FLOATS_PER_BULLET); }
 
   const size_t BulletsCount() const { return PointsCount(); }
+  static const size_t FLOATS_PER_BULLET = 2;
 };
 
-struct BulletManager 
+class BulletManager 
 {
 public:
   BulletManager() 
