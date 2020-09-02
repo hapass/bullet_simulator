@@ -5,8 +5,12 @@
 #include <iostream>
 #include <vector>
 #include <utility>
+#include <chrono>
+#include <numeric>
+#include <algorithm>
 
 using namespace std;
+using namespace std::chrono;
 
 struct float2 { float x; float y; };
 
@@ -146,6 +150,9 @@ int main(int argc, char** argv)
 
   glPointSize(2.0);
 
+  int64_t frame_counter = 0;
+  auto start = steady_clock::now();
+
   while (!glfwWindowShouldClose(window))
   {
     m.Update(0.16f);
@@ -167,6 +174,15 @@ int main(int argc, char** argv)
 
     glfwSwapBuffers(window);
     glfwPollEvents();
+
+    auto current_time = steady_clock::now();
+    frame_counter++;
+    if (duration_cast<milliseconds>(current_time - start).count() > 1000)
+    {
+      cout << "FPS: " << frame_counter << "\n";
+      frame_counter = 0;
+      start = current_time;
+    }
   }
 
   glfwTerminate();

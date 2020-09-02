@@ -49,10 +49,6 @@ Wednesday:
 
 Thursday:
 
-1. Display FPS counter.
-
-Friday:
-
 1. Optimize drawing and collision detection as much as possible.
     * try using broad and narrow collision phases
 
