@@ -16,6 +16,7 @@ struct float2 { float x; float y; };
 
 struct BulletManager 
 {
+public:
   BulletManager() 
   : walls { -1.0f, 1.0f, 1.0f, -1.0f, -0.8f, 0.5f, 0.2f, -0.1f, -0.3f, 0.5f, 0.2f, -0.5f, -0.6f, 0.6f, 0.2f, -0.4f }
   , bullets { 0.15, 0.25, -0.75, 0.85, 0.95, -0.35 }
@@ -25,10 +26,23 @@ struct BulletManager
   {
     bullets[0] += 0.001;
   }
-  void Fire(float2 pos, float2 dir, float speed, float time, float life_time) {}
 
-  float walls[16];
-  float bullets[6];
+  void Fire(float2 pos, float2 dir, float speed, float time, float life_time) 
+  {
+
+  }
+
+  const float* GetWallsData() const { return walls.data(); }
+  const size_t GetWallsSize() const { return sizeof(float) * walls.size(); }
+  const size_t GetWallsPointsCount() const { return walls.size() / 2; }
+
+  const float* GetBulletsData() const { return bullets.data(); }
+  const size_t GetBulletsSize() const { return sizeof(float) * bullets.size(); }
+  const size_t GetBulletsPointsCount() const { return bullets.size() / 2; }
+
+private:
+  vector<float> walls;
+  vector<float> bullets;
 };
 
 int main(int argc, char** argv)
@@ -140,13 +154,13 @@ int main(int argc, char** argv)
   glBindBuffer(GL_ARRAY_BUFFER, buffers[0]);
   glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
   glEnableVertexAttribArray(0);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(m.walls), m.walls, GL_DYNAMIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, m.GetWallsSize(), m.GetWallsData(), GL_DYNAMIC_DRAW);
 
   glBindVertexArray(arrays[1]);
   glBindBuffer(GL_ARRAY_BUFFER, buffers[1]);
   glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
   glEnableVertexAttribArray(0);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(m.bullets), m.bullets, GL_DYNAMIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, m.GetBulletsSize(), m.GetBulletsData(), GL_DYNAMIC_DRAW);
 
   glPointSize(2.0);
 
@@ -164,13 +178,13 @@ int main(int argc, char** argv)
 
     // draw walls
     glBindVertexArray(arrays[0]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(m.walls), m.walls, GL_DYNAMIC_DRAW);
-    glDrawArrays(GL_LINES, 0, 8);
+    glBufferData(GL_ARRAY_BUFFER, m.GetWallsSize(), m.GetWallsData(), GL_DYNAMIC_DRAW);
+    glDrawArrays(GL_LINES, 0, m.GetWallsPointsCount());
 
     // draw bullets
     glBindVertexArray(arrays[1]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(m.bullets), m.bullets, GL_DYNAMIC_DRAW);
-    glDrawArrays(GL_POINTS, 0, 3);
+    glBufferData(GL_ARRAY_BUFFER, m.GetBulletsSize(), m.GetBulletsData(), GL_DYNAMIC_DRAW);
+    glDrawArrays(GL_POINTS, 0, m.GetBulletsPointsCount());
 
     glfwSwapBuffers(window);
     glfwPollEvents();

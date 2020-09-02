@@ -52,11 +52,11 @@ Thursday:
 1. Optimize drawing and collision detection as much as possible.
     * try using broad and narrow collision phases
 
-Saturday:
+Friday:
 
 1. Add multi-threaded bullet addition - check performance. Release 1.0.
 
-Sunday - Tuesday:
+Saturday - Tuesday:
 
 1. If performance is not good enough try multi-threading physics calculations. Release 2.0
     * try different pools for bullets based on bullet id to minimize thread contention
