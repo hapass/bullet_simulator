@@ -15,7 +15,7 @@ There is a BulletManager class with two public methods:
 1. Method that adds bullet to manager for further updates. Is called from different threads.
 
     ````C++
-    void Fire(float2 pos, float2 dir, float speed, float time, float life_time);
+    void Fire(Vec2 pos, Vec2 dir, float speed, float time, float life_time);
     ````
 
     * pos – starting point of the bullet on the plane (in meters)

@@ -6,43 +6,94 @@
 #include <vector>
 #include <utility>
 #include <chrono>
-#include <numeric>
-#include <algorithm>
+#include <assert.h>
 
 using namespace std;
 using namespace std::chrono;
 
-struct float2 { float x; float y; };
+struct Vec2 { float x; float y; };
+
+template<typename T>
+class PointBuffer
+{
+public:
+  const float* Data() const { return buffer.data(); }
+  const size_t Size() const { return sizeof(float) * buffer.size(); }
+  const size_t PointsCount() const { return buffer.size() / 2; }
+protected:
+  vector<T> buffer;
+};
+
+class WallsBuffer: public PointBuffer<float>
+{
+public:
+  void Add(Vec2 start, Vec2 end)
+  {
+    buffer.push_back(start.x);
+    buffer.push_back(start.y);
+    buffer.push_back(end.x);
+    buffer.push_back(end.y);
+  }
+
+  float& StartX(size_t i) { assert(WallsCount() != 0 && i < WallsCount()); return buffer[i * 4 + 0]; }
+  float& StartY(size_t i) { assert(WallsCount() != 0 && i < WallsCount()); return buffer[i * 4 + 1]; }
+  float& EndX(size_t i) { assert(WallsCount() != 0 && i < WallsCount()); return buffer[i * 4 + 2]; }
+  float& EndY(size_t i) { assert(WallsCount() != 0 && i < WallsCount()); return buffer[i * 4 + 3]; }
+
+  void Remove(size_t i)
+  {
+    assert(WallsCount() != 0 && i < WallsCount());
+
+    size_t item_offset = i * 4;
+    size_t last_offset = (WallsCount() - 1) * 4;
+    for (int j = 0; j < 4; j++) swap(buffer[item_offset + j], buffer[last_offset + j]);
+  }
+
+  const size_t WallsCount() const { return buffer.size() / 4; }
+};
+
+class BulletsBuffer: public PointBuffer<float>
+{
+public:
+  void Add(Vec2 pos)
+  {
+    buffer.push_back(pos.x);
+    buffer.push_back(pos.y);
+  }
+
+  float& X(size_t i) { assert(BulletsCount() != 0 && i < BulletsCount()); return buffer[i * 2 + 0]; }
+  float& Y(size_t i) { assert(BulletsCount() != 0 && i < BulletsCount()); return buffer[i * 2 + 1]; }
+
+  const size_t BulletsCount() const { return PointsCount(); }
+};
 
 struct BulletManager 
 {
 public:
   BulletManager() 
-  : walls { -1.0f, 1.0f, 1.0f, -1.0f, -0.8f, 0.5f, 0.2f, -0.1f, -0.3f, 0.5f, 0.2f, -0.5f, -0.6f, 0.6f, 0.2f, -0.4f }
-  , bullets { 0.15, 0.25, -0.75, 0.85, 0.95, -0.35 }
-  {}
+  {
+    walls.Add({-1.0f, 1.0f}, {1.0f, -1.0f});
+    walls.Add({-0.8f, 0.5f}, {0.2f, -0.1f});
+    walls.Add({-0.3f, 0.5f}, {0.2f, -0.5f});
+    walls.Add({-0.6f, 0.6f}, {0.2f, -0.4f});
+  }
 
   void Update(float time) 
   {
-    bullets[0] += 0.001;
+    bullets.X(0) += 0.001;
   }
 
-  void Fire(float2 pos, float2 dir, float speed, float time, float life_time) 
+  void Fire(Vec2 pos, Vec2 dir, float speed, float time, float life_time) 
   {
-
+    bullets.Add(pos);
   }
 
-  const float* GetWallsData() const { return walls.data(); }
-  const size_t GetWallsSize() const { return sizeof(float) * walls.size(); }
-  const size_t GetWallsPointsCount() const { return walls.size() / 2; }
-
-  const float* GetBulletsData() const { return bullets.data(); }
-  const size_t GetBulletsSize() const { return sizeof(float) * bullets.size(); }
-  const size_t GetBulletsPointsCount() const { return bullets.size() / 2; }
+  const PointBuffer<float>& Walls() { return walls; }
+  const PointBuffer<float>& Bullets() { return bullets; }
 
 private:
-  vector<float> walls;
-  vector<float> bullets;
+  WallsBuffer walls;
+  BulletsBuffer bullets;
 };
 
 int main(int argc, char** argv)
@@ -149,18 +200,21 @@ int main(int argc, char** argv)
   glGenVertexArrays(2, arrays);
 
   BulletManager m;
+  m.Fire({0.15, 0.25}, {0.0f, 0.0f}, 0.0f, 0.0f, 0.0f);
+  m.Fire({-0.75, 0.85}, {0.0f, 0.0f}, 0.0f, 0.0f, 0.0f);
+  m.Fire({0.95, -0.35}, {0.0f, 0.0f}, 0.0f, 0.0f, 0.0f);
 
   glBindVertexArray(arrays[0]);
   glBindBuffer(GL_ARRAY_BUFFER, buffers[0]);
   glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
   glEnableVertexAttribArray(0);
-  glBufferData(GL_ARRAY_BUFFER, m.GetWallsSize(), m.GetWallsData(), GL_DYNAMIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, m.Walls().Size(), m.Walls().Data(), GL_DYNAMIC_DRAW);
 
   glBindVertexArray(arrays[1]);
   glBindBuffer(GL_ARRAY_BUFFER, buffers[1]);
   glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
   glEnableVertexAttribArray(0);
-  glBufferData(GL_ARRAY_BUFFER, m.GetBulletsSize(), m.GetBulletsData(), GL_DYNAMIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, m.Bullets().Size(), m.Bullets().Data(), GL_DYNAMIC_DRAW);
 
   glPointSize(2.0);
 
@@ -178,13 +232,13 @@ int main(int argc, char** argv)
 
     // draw walls
     glBindVertexArray(arrays[0]);
-    glBufferData(GL_ARRAY_BUFFER, m.GetWallsSize(), m.GetWallsData(), GL_DYNAMIC_DRAW);
-    glDrawArrays(GL_LINES, 0, m.GetWallsPointsCount());
+    glBufferData(GL_ARRAY_BUFFER, m.Walls().Size(), m.Walls().Data(), GL_DYNAMIC_DRAW);
+    glDrawArrays(GL_LINES, 0, m.Walls().PointsCount());
 
     // draw bullets
     glBindVertexArray(arrays[1]);
-    glBufferData(GL_ARRAY_BUFFER, m.GetBulletsSize(), m.GetBulletsData(), GL_DYNAMIC_DRAW);
-    glDrawArrays(GL_POINTS, 0, m.GetBulletsPointsCount());
+    glBufferData(GL_ARRAY_BUFFER, m.Bullets().Size(), m.Bullets().Data(), GL_DYNAMIC_DRAW);
+    glDrawArrays(GL_POINTS, 0, m.Bullets().PointsCount());
 
     glfwSwapBuffers(window);
     glfwPollEvents();
