@@ -41,14 +41,12 @@ Work of this class is visualized.
 
 ## Tasks
 
-Wednesday:
-
-1. Add bullets to the screen through bullet manager - single threaded.
-1. Move bullets on the screen - single threaded.
-1. Implement collision detection and resolution - single threaded.
-
 Thursday:
 
+1. Bullets should appear when time comes.
+1. Speed should not depend on frame rate.
+1. Bullets should die when time comes.
+1. Implement collision detection and resolution - single threaded.
 1. Optimize drawing and collision detection as much as possible.
     * try using broad and narrow collision phases
 
